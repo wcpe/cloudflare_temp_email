@@ -30,9 +30,9 @@ jobs:
         run: cd frontend/dist/ && zip -r frontend.zip * && mv frontend.zip ../
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/cache/save@v4
         with:
-          name: frontend
+          key: frontend-${{ github.run_id }}-${{ github.run_attempt }}
           path: frontend/frontend.zip
 
   build-telegram-frontend:
@@ -59,9 +59,9 @@ jobs:
         run: cd frontend/dist/ && zip -r telegram-frontend.zip * && mv telegram-frontend.zip ../
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/cache/save@v4
         with:
-          name: telegram-frontend
+          key: telegram-frontend-${{ github.run_id }}-${{ github.run_attempt }}
           path: frontend/telegram-frontend.zip
 
   build-backend:
@@ -101,15 +101,15 @@ jobs:
           zip -r worker-with-wasm-mail-parser.zip dist/worker.js dist/*.wasm
 
       - name: Upload worker.js
-        uses: actions/upload-artifact@v7
+        uses: actions/cache/save@v4
         with:
-          name: worker-js
+          key: worker-js-${{ github.run_id }}-${{ github.run_attempt }}
           path: worker/worker.js
 
       - name: Upload wasm worker
-        uses: actions/upload-artifact@v7
+        uses: actions/cache/save@v4
         with:
-          name: worker-wasm
+          key: worker-wasm-${{ github.run_id }}-${{ github.run_attempt }}
           path: worker/worker-with-wasm-mail-parser.zip
 
   release:
@@ -122,9 +122,26 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/cache/restore@v4
         with:
-          path: artifacts
+          key: frontend-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/frontend
+          fail-on-cache-miss: true
+      - uses: actions/cache/restore@v4
+        with:
+          key: telegram-frontend-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/telegram-frontend
+          fail-on-cache-miss: true
+      - uses: actions/cache/restore@v4
+        with:
+          key: worker-js-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/worker-js
+          fail-on-cache-miss: true
+      - uses: actions/cache/restore@v4
+        with:
+          key: worker-wasm-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/worker-wasm
+          fail-on-cache-miss: true
 
       - name: Upload Assets to Release
         run: |

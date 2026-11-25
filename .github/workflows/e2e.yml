@@ -17,16 +17,6 @@ jobs:
           cd e2e
           docker compose up --build --abort-on-container-exit --exit-code-from e2e-runner
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: playwright-report
-          path: |
-            e2e/test-results/
-            e2e/playwright-report/
-          retention-days: 30
-
       - name: Cleanup
         if: always()
         run: |
